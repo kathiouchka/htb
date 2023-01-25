@@ -18,6 +18,7 @@ ping -c 4 "$target_ip"
 # Create the "nmap" and "tests" directorys
 mkdir "$dir_name/nmap"
 mkdir "$dir_name/tests"
+mkdir "$dir_name/gobuster"
 
 # Run nmap scan and save the results to a file
 nmap -sC -sV -oN "$dir_name/nmap/results.txt" -p- --min-rate=1000 -v "$target_ip"
@@ -25,5 +26,11 @@ nmap -sC -sV -oN "$dir_name/nmap/results.txt" -p- --min-rate=1000 -v "$target_ip
 # Open the info.txt file with mousepad text editor
 mousepad "$dir_name/info.txt" &
 
-# Change directory to tests
-cd "$dir_name/tests"
+# Check if port 80 is open
+if grep -q "80/tcp open" "$dir_name/nmap/results.txt"; then
+  # Open the URL in Firefox
+    firefox http://$target_ip &
+    gobuster dir -u http://$target_ip -w /usr/share/wordlists/dirb/common.txt -o "$dir_name/gobuster/output.txt"
+else
+  echo "Port 80 is not open"
+fi
